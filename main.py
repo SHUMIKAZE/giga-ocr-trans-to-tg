@@ -1,6 +1,18 @@
 #!/usr/bin/env python3
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # отключает CUDA полностью
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="torch")
+warnings.filterwarnings("ignore", category=FutureWarning)
+
+# Подавляем логи от transformers / sentencepiece / torch
+import logging
+logging.getLogger("transformers").setLevel(logging.ERROR)
+logging.getLogger("sentencepiece").setLevel(logging.ERROR)
+logging.getLogger("torch").setLevel(logging.ERROR)
+
 import sys
 import subprocess
 from PIL import Image, ImageEnhance
@@ -62,7 +74,7 @@ try:
         config='--psm 11'  # сплошной текст без структуры — лучший режим для скриншотов
     )
     # Убираем form feed и лишние пробелы
-    #text = text.replace('/f', '').strip()
+    text = text.replace('\f', '').strip()
 except Exception as e:
     print(f"❌ Ошибка Tesseract: {e}", file=sys.stderr)
     sys.exit(1)
@@ -114,7 +126,8 @@ try:
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     payload = {
         "chat_id": CHAT_ID,
-        "text": f"📄 EN:\n{text}\n\n🇷🇺 RU:\n{translated}",
+        "text": f"{translated}",
+        #"text": f"📄 EN:\n{text}\n\n🇷🇺 RU:\n{translated}",
         "parse_mode": "HTML"  # можно убрать, если не используешь HTML
     }
     resp = requests.post(url, data=payload, timeout=10)
@@ -138,7 +151,3 @@ print("=" * 50)
 # --- 7. Очистка ---
 if os.path.exists(SHOT_PATH):
     os.remove(SHOT_PATH)
-
-
-#       You did... But i didn't. So, it's
-#       time. We end. Don't forget this.
