@@ -1,0 +1,17 @@
+# Виртуальное окружение
+venv/
+env/
+ENV/
+
+# Секреты
+.env
+
+# Кэш и временные файлы
+__pycache__/
+*.pyc
+/tmp/
+
+# IDE
+.vscode/
+*.swp
+.DS_Store
